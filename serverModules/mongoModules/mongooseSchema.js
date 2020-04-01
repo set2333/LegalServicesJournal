@@ -56,7 +56,7 @@ const Order = mongoose.model(
       creationDate: Date,
       creationNumber: Number,
       comment: String,
-      action: String,
+      action: [{ type: Schema.Types.ObjectId, ref: 'action' }],
     },
     { versionKey: false },
   ),
