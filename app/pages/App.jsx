@@ -1,23 +1,16 @@
-import React, { useState } from 'react';
-import {
-  BrowserRouter as Router, Route, Switch, useLocation,
-} from 'react-router-dom';
+import React, { useState, useReducer } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import clsx from 'clsx';
 import { makeStyles, createStyles } from '@material-ui/core/styles';
 import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Drawer,
-  Typography,
-  CssBaseline,
-  Divider,
+  AppBar, IconButton, Drawer, CssBaseline, Divider,
 } from '@material-ui/core';
-import { Menu as MenuIcon, ChevronLeft } from '@material-ui/icons';
+import { ChevronLeft } from '@material-ui/icons';
 import Nav from '../components/Nav.jsx';
 import Menu from '../components/Menu.jsx';
 import Actions from '../components/Actions.jsx';
 import Orders from '../components/Orders.jsx';
+import { useModalAction, useModalOrder } from '../components/ModalWindow.jsx';
 
 const drawerWidth = 240;
 
@@ -71,11 +64,31 @@ const useStyles = makeStyles((theme) => createStyles({
   },
 }));
 
+const reducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_FILTER':
+      return { ...action.value };
+    default:
+      return { ...state };
+  }
+};
+
+const initialState = {
+  startDate: new Date(),
+  endDate: new Date(),
+  filter: {},
+};
+
 function App() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // Панель навигации - открыта/закрыта
   const classes = useStyles();
+  const [ModalAction, openModalAction] = useModalAction();
+  const [ModaOrder, openModalOrder] = useModalOrder();
+  const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <div className={classes.root}>
+      <ModalAction />
+      <ModaOrder />
       <CssBaseline />
       <AppBar
         position="fixed"
@@ -83,7 +96,13 @@ function App() {
           [classes.appBarShift]: open,
         })}
       >
-        <Menu open={open} openPanel={setOpen} />
+        <Menu
+          open={open}
+          openPanel={setOpen}
+          openModalAction={openModalAction}
+          openModalOrder={openModalOrder}
+          dispatch={dispatch}
+        />
       </AppBar>
       <Drawer
         className={classes.drawer}
@@ -110,8 +129,8 @@ function App() {
         <div className={classes.drawerHeader} />
         <div>
           <Switch>
-            <Route exact path="/" component={Actions} />
-            <Route path="/orders" component={Orders} />
+            <Route exact path="/" component={() => Actions(state)} />
+            <Route path="/orders" component={() => Orders(state)} />
           </Switch>
         </div>
       </main>
