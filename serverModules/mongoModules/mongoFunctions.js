@@ -2,6 +2,15 @@
 const mongoose = require('mongoose');
 const { Action, Order } = require('./mongooseSchema');
 
+const getFilter = (filter) => {
+  const result = {};
+  for (const [key, value] of Object.entries(filter)) {
+    if (key === 'accused' || key === 'jurist' || key === 'actionString') result[key] = { $regex: new RegExp(value), $options: 'i' };
+    else result[key] = value;
+  }
+  return result;
+};
+
 // Получить дело по id.
 const getOneAction = (id = null) => new Promise((resolve) => {
   if (id === null) resolve(null);
@@ -73,6 +82,11 @@ const addAction = ({
         accused: accused || result.accused,
         article: article || result.article,
         comment: comment || result.comment,
+        actionString: `№ ${
+          result.creationNumber
+        } от ${result.creationDate.toLocaleDateString()} (${number || result.number} от ${
+          date ? new Date(date).toLocaleDateString() : result.date.toLocaleDateString()
+        })`,
       };
       Action.findByIdAndUpdate(id, action, (err, doc) => {
         if (err) resolve(null);
@@ -81,6 +95,7 @@ const addAction = ({
     });
   } else {
     getMaxNumberAction().then((maxNumber) => {
+      const creationDate = new Date();
       const newAction = new Action({
         date,
         number,
@@ -88,8 +103,12 @@ const addAction = ({
         accused,
         article,
         comment,
-        creationDate: new Date(),
+        creationDate,
         creationNumber: maxNumber + 1,
+        actionString: `№ ${maxNumber
+            + 1} от ${creationDate.toLocaleDateString()} (${number} от ${new Date(
+          date,
+        ).toLocaleDateString()})`,
       });
       newAction.save((err, doc) => {
         if (err) resolve(null);
@@ -121,36 +140,58 @@ const addOrder = ({
   ) resolve(null);
   else if (id) {
     getOneOrder(id).then((result) => {
-      const order = {
-        date: date || result.date,
-        number: number || result.number,
-        jurist: jurist || result.jurist,
-        accused: accused || result.accused,
-        article: article || result.article,
-        comment: comment || result.comment,
-        action: action || result.action,
-      };
-      Order.findByIdAndUpdate(id, order, (err, doc) => {
-        if (err) resolve(null);
-        else resolve(doc);
+      getOneAction(action || result.action).then((currentAction) => {
+        if (currentAction === null) resolve(null);
+        else {
+          const order = {
+            date: date || result.date,
+            number: number || result.number,
+            jurist: jurist || result.jurist,
+            accused: accused || result.accused,
+            article: article || result.article,
+            comment: comment || result.comment,
+            action: action
+              ? mongoose.Types.ObjectId(action)
+              : mongoose.Types.ObjectId(result.action[0]),
+            actionString: `№ ${
+              currentAction.creationNumber
+            } от ${currentAction.creationDate.toLocaleDateString()} (${
+              currentAction.number
+            } от ${currentAction.date.toLocaleDateString()})`,
+          };
+          Order.findByIdAndUpdate(id, order, (err, doc) => {
+            if (err) resolve(null);
+            else resolve(doc);
+          });
+        }
       });
     });
   } else {
     getMaxNumberOrder().then((maxNumber) => {
-      const newOrder = new Order({
-        date,
-        number,
-        jurist,
-        accused,
-        article,
-        comment,
-        creationDate: new Date(),
-        creationNumber: maxNumber + 1,
-        action: mongoose.Types.ObjectId(action),
-      });
-      newOrder.save((err, doc) => {
-        if (err) resolve(null);
-        else resolve(doc);
+      getOneAction(action).then((currentAction) => {
+        if (currentAction === null) resolve(null);
+        else {
+          const newOrder = new Order({
+            date,
+            number,
+            jurist,
+            accused,
+            article,
+            comment,
+            creationDate: new Date(),
+            creationNumber: maxNumber + 1,
+            action: mongoose.Types.ObjectId(action),
+            actionString: `№ ${
+              currentAction.creationNumber
+            } от ${currentAction.creationDate.toLocaleDateString()} (${
+              currentAction.number
+            } от ${currentAction.date.toLocaleDateString()})`,
+          });
+          newOrder.save((err, doc) => {
+            if (err) resolve(null);
+            else resolve(doc);
+          });
+        }
       });
     });
   }
@@ -162,7 +203,11 @@ const getActions = (
   filter = {},
 ) => new Promise((resolve) => {
   Action.find({
-    $and: [{ creationDate: { $gte: startDate } }, { creationDate: { $lte: endDate } }, filter],
+    $and: [
+      { creationDate: { $gte: startDate } },
+      { creationDate: { $lte: endDate } },
+      getFilter(filter),
+    ],
   })
     .sort('-creationDate')
     .exec((err, doc) => {
@@ -177,7 +222,11 @@ const getOrders = (
   filter = {},
 ) => new Promise((resolve) => {
   Order.find({
-    $and: [{ creationDate: { $gte: startDate } }, { creationDate: { $lte: endDate } }, filter],
+    $and: [
+      { creationDate: { $gte: startDate } },
+      { creationDate: { $lte: endDate } },
+      getFilter(filter),
+    ],
   })
     .sort('-creationDate')
     .exec((err, doc) => {

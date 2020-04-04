@@ -194,9 +194,30 @@ describe('TEST: module mongoFunction.js', () => {
     });
   });
 
+  it('addAction редактирование дела без комментария', (done) => {
+    const testDate = new Date();
+    addAction({
+      date: testDate,
+      number: '123',
+      issuingAuthority: 'Судом',
+      accused: 'Иванов Иван Иванович',
+      article: 'ст.789',
+    }).then((newAction) => {
+      addAction({
+        id: newAction._id,
+        number: '556',
+      }).then(() => {
+        getOneAction(newAction._id).then((result) => {
+          assert.equal(result.number, '556');
+          done();
+        });
+      });
+    });
+  });
+
   it('getMaxNumberAction с документами', (done) => {
     getMaxNumberAction().then((result) => {
-      assert.equal(result, 6);
+      assert.equal(result, 7);
       done();
     });
   });
@@ -211,14 +232,14 @@ describe('TEST: module mongoFunction.js', () => {
       article: 'ст.789',
       comment: 'другой комментарий',
     }).then((result) => {
-      assert.equal(result.creationNumber, 7);
+      assert.equal(result.creationNumber, 8);
       done();
     });
   });
 
   it('getActions без параметров', (done) => {
     getActions().then((result) => {
-      assert.equal(result.length, 7);
+      assert.equal(result.length, 8);
       done();
     });
   });
@@ -244,7 +265,7 @@ describe('TEST: module mongoFunction.js', () => {
     getActions().then((result) => {
       assert.deepEqual(
         { max: result[0].creationNumber, min: result[6].creationNumber },
-        { max: 7, min: 1 },
+        { max: 8, min: 2 },
       );
       done();
     });
@@ -404,6 +425,7 @@ describe('TEST: module mongoFunction.js', () => {
           accused: 'Иванов Иван Иванович',
           article: 'ст.123',
           comment: 'Комментарий',
+          action: id,
         }).then(() => {
           getOneOrder(_id).then((result) => {
             assert.equal(result.number, '456');

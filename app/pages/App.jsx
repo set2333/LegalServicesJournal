@@ -11,6 +11,7 @@ import Menu from '../components/Menu.jsx';
 import Actions from '../components/Actions.jsx';
 import Orders from '../components/Orders.jsx';
 import { useModalAction, useModalOrder } from '../components/ModalWindow.jsx';
+import { endDay, agoMonth } from '../functions/dateFunction';
 
 const drawerWidth = 240;
 
@@ -48,7 +49,7 @@ const useStyles = makeStyles((theme) => createStyles({
   },
   content: {
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(8),
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -74,8 +75,8 @@ const reducer = (state, action) => {
 };
 
 const initialState = {
-  startDate: new Date(),
-  endDate: new Date(),
+  startDate: agoMonth(Date.now()),
+  endDate: endDay(Date.now()),
   filter: {},
 };
 
@@ -129,8 +130,21 @@ function App() {
         <div className={classes.drawerHeader} />
         <div>
           <Switch>
-            <Route exact path="/" component={() => Actions(state)} />
-            <Route path="/orders" component={() => Orders(state)} />
+            <Route
+              exact
+              path="/"
+              component={() => Actions({
+                ...state,
+                clickRow: (value) => openModalAction({ open: true, id: value }),
+              })}
+            />
+            <Route
+              path="/orders"
+              component={() => Orders({
+                ...state,
+                clickRow: (value) => openModalOrder({ open: true, id: value }),
+              })}
+            />
           </Switch>
         </div>
       </main>

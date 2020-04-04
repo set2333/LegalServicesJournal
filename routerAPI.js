@@ -8,6 +8,7 @@ const {
   getActions,
   getOrders,
 } = require('./serverModules/mongoModules/mongoFunctions');
+const { getExcelActionById } = require('./serverModules/excelModules/getExcel');
 
 const RouterAPI = express.Router();
 
@@ -50,6 +51,12 @@ RouterAPI.post('/api/orders', jsonParser, validBody, async (req, res) => {
   const orders = await getOrders(req.body.startDate, req.body.endDate, req.body.filter);
   if (orders === null) return res.sendStatus(400);
   return res.send(JSON.stringify(orders));
+});
+
+RouterAPI.post('/api/excelAction', jsonParser, validBody, async (req, res) => {
+  const excel = await getExcelActionById(req.body.id);
+  if (excel === null) return res.sendStatus(400);
+  return res.sendStatus(200);
 });
 
 module.exports = RouterAPI;
