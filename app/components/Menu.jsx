@@ -14,7 +14,7 @@ import {
   beginDay, endDay, agoMonth, beginDateZeroTime,
 } from '../functions/dateFunction';
 import Input from '../auxiliaryComponents/Input.jsx';
-import { getExcelAction } from '../api/api';
+import { getExcelActions, getExcelOrders } from '../api/api';
 
 const useStyles = makeStyles((theme) => createStyles({
   menuButton: {
@@ -69,6 +69,18 @@ const Menu = ({
   const { pathname } = useLocation();
   const [state, stateDispatch] = useReducer(reducer, initialState);
   const classes = useStyles();
+  const getFilter = () => {
+    const filter = {};
+    if (state.accused) filter.accused = state.accused;
+    if (state.date && new Date(state.date).toString() !== 'Invalid Date') filter.date = beginDateZeroTime(state.date);
+    if (state.number) filter.number = state.number;
+    if (state.creationNumber) filter.creationNumber = state.creationNumber;
+    if (typeMenu === 'orders' || (typeMenu === null && pathname === '/orders')) {
+      if (state.jurist) filter.jurist = state.jurist;
+      if (state.actionString) filter.actionString = state.actionString;
+    }
+    return filter;
+  };
   const periods = [
     {
       label: 'Начало периода',
@@ -168,15 +180,7 @@ const Menu = ({
           <Grid>
             <IconButton
               onClick={() => {
-                const filter = {};
-                if (state.accused) filter.accused = state.accused;
-                if (state.date && new Date(state.date).toString() !== 'Invalid Date') filter.date = beginDateZeroTime(state.date);
-                if (state.number) filter.number = state.number;
-                if (state.creationNumber) filter.creationNumber = state.creationNumber;
-                if (typeMenu === 'orders' || (typeMenu === null && pathname === '/orders')) {
-                  if (state.jurist) filter.jurist = state.jurist;
-                  if (state.actionString) filter.actionString = state.actionString;
-                }
+                const filter = getFilter();
                 dispatch({
                   type: 'SET_FILTER',
                   value: { startDate: state.startDate, endDate: state.endDate, filter },
@@ -194,7 +198,36 @@ const Menu = ({
               <AddCircleOutline style={{ color: '#000000', fontSize: 48 }} />
             </IconButton>
             <IconButton
-              onClick={() => getExcelAction('123456789').subscribe((response) => console.log(response))}
+              onClick={() => {
+                const filter = getFilter();
+                if (pathname === '/') {
+                  getExcelActions({
+                    startDate: new Date(state.startDate),
+                    endDate: new Date(state.endDate),
+                    filter,
+                  }).subscribe((response) => {
+                    if (response.result) {
+                      window.open(
+                        `http://${window.location.host}/getFile?fileName=${response.fileName}`,
+                        '_self',
+                      );
+                    }
+                  });
+                } else {
+                  getExcelOrders({
+                    startDate: new Date(state.startDate),
+                    endDate: new Date(state.endDate),
+                    filter,
+                  }).subscribe((response) => {
+                    if (response.result) {
+                      window.open(
+                        `http://${window.location.host}/getFile?fileName=${response.fileName}`,
+                        '_self',
+                      );
+                    }
+                  });
+                }
+              }}
             >
               <BackupOutlined style={{ color: '#000000', fontSize: 48 }} />
             </IconButton>

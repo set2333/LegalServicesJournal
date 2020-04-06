@@ -40,6 +40,21 @@ const editOrder = (body = {}, id = null) => {
 
 const getExcelAction = (body = '') => send('/api/excelAction', { id: body });
 
+const getExcelOrder = (body = '') => send('/api/excelOrder', { id: body });
+
+const getExcelActions = (body = {}) => send('/api/excelActions', body);
+
+const getExcelOrders = (body = {}) => send('/api/excelOrders', body);
+
 export {
-  getOneAction, getOneOrder, getActions, getOrders, editAction, editOrder, getExcelAction,
+  getOneAction,
+  getOneOrder,
+  getActions,
+  getOrders,
+  editAction,
+  editOrder,
+  getExcelAction,
+  getExcelActions,
+  getExcelOrder,
+  getExcelOrders,
 };

@@ -28,7 +28,8 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-router-dom": "^5.0.0",
-    "rxjs": "^6.5.4"
+    "rxjs": "^6.5.4",
+    "uid": "^1.0.0"
   },
   "bugs": {
     "url": "https://github.com/set2333/LegalServicesJournal/issues"

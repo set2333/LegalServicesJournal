@@ -13,7 +13,12 @@ import {
   DialogTitle,
 } from '@material-ui/core/';
 import {
-  editAction, editOrder, getOneAction, getOneOrder,
+  editAction,
+  editOrder,
+  getOneAction,
+  getOneOrder,
+  getExcelOrder,
+  getExcelAction,
 } from '../api/api';
 import {
   getInputDate, getLocalDate, agoMonth, endDay,
@@ -221,6 +226,20 @@ const useModalAction = () => {
                 </Button>
                 <Button
                   variant="contained"
+                  onClick={() => getExcelAction(stateModal.id).subscribe((response) => {
+                    if (response.result) {
+                      window.open(
+                        `http://${window.location.host}/getFile?fileName=${response.fileName}`,
+                        '_self',
+                      );
+                    }
+                  })}
+                  style={buttonStyle}
+                >
+                  Загрузить
+                </Button>
+                <Button
+                  variant="contained"
                   color="secondary"
                   onClick={() => setStateModal({ open: false, id: null })}
                   style={buttonStyle}
@@ -347,6 +366,20 @@ const useModalOrder = () => {
                   style={buttonStyle}
                 >
                   Сохранить
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={() => getExcelOrder(stateModal.id).subscribe((response) => {
+                    if (response.result) {
+                      window.open(
+                        `http://${window.location.host}/getFile?fileName=${response.fileName}`,
+                        '_self',
+                      );
+                    }
+                  })}
+                  style={buttonStyle}
+                >
+                  Загрузить
                 </Button>
                 <Button
                   variant="contained"

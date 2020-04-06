@@ -7,6 +7,11 @@ const app = express();
 app.use(express.static(`${__dirname}/public`));
 app.use(RouterAPI);
 app.use(Router);
+
+process.on('SIGINT', () => {
+  process.exit();
+});
+
 mongoose.set('useFindAndModify', false);
 mongoose.connect(
   'mongodb://localhost:27017/juristjournal',
