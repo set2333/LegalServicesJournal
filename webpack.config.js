@@ -9,6 +9,9 @@ module.exports = {
     publicPath: '/public/',
     filename: '[name].js',
   },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
   module: {
     rules: [
       // загрузчик для jsx

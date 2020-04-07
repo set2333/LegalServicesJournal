@@ -1,69 +1,20 @@
+// Основная страница.
 import React, { useState, useReducer } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import clsx from 'clsx';
-import { makeStyles, createStyles } from '@material-ui/core/styles';
 import {
   AppBar, IconButton, Drawer, CssBaseline, Divider,
 } from '@material-ui/core';
 import { ChevronLeft } from '@material-ui/icons';
-import Nav from '../components/Nav.jsx';
-import Menu from '../components/Menu.jsx';
-import Actions from '../components/Actions.jsx';
-import Orders from '../components/Orders.jsx';
-import { useModalAction, useModalOrder } from '../components/ModalWindow.jsx';
+import Nav from '../components/Nav';
+import Menu from '../components/Menu';
+import Actions from '../components/Actions';
+import Orders from '../components/Orders';
+import { useModalAction, useModalOrder } from '../components/ModalWindow';
 import { endDay, agoMonth } from '../functions/dateFunction';
+import MakeStyles from '../styles';
 
-const drawerWidth = 240;
-
-const useStyles = makeStyles((theme) => createStyles({
-  root: {
-    display: 'flex',
-  },
-  appBar: {
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-  },
-  appBarShift: {
-    width: `calc(100% - ${drawerWidth}px)`,
-    marginLeft: drawerWidth,
-    transition: theme.transitions.create(['margin', 'width'], {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-  },
-  drawer: {
-    width: drawerWidth,
-    flexShrink: 0,
-  },
-  drawerPaper: {
-    width: drawerWidth,
-  },
-  drawerHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: theme.spacing(0, 1),
-    ...theme.mixins.toolbar,
-    justifyContent: 'flex-end',
-  },
-  content: {
-    flexGrow: 1,
-    padding: theme.spacing(8),
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.leavingScreen,
-    }),
-    marginLeft: -drawerWidth,
-  },
-  contentShift: {
-    transition: theme.transitions.create('margin', {
-      easing: theme.transitions.easing.easeOut,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    marginLeft: 0,
-  },
-}));
+const useStyles = MakeStyles;
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -74,6 +25,10 @@ const reducer = (state, action) => {
   }
 };
 
+// В состоянии хранятся фильтры для списка дел/ордеров.
+// startDate - дата создания с которой ищем дела/ордера
+// endDate- дата создания по которую ищем дела/ордера
+// filter - объект-фильтр для поиска дел.
 const initialState = {
   startDate: agoMonth(Date.now()),
   endDate: endDay(Date.now()),
@@ -82,9 +37,9 @@ const initialState = {
 
 function App() {
   const [open, setOpen] = useState(false); // Панель навигации - открыта/закрыта
-  const classes = useStyles();
-  const [ModalAction, openModalAction] = useModalAction();
-  const [ModaOrder, openModalOrder] = useModalOrder();
+  const classes = useStyles(); // Стили
+  const [ModalAction, openModalAction] = useModalAction(); // Подключим модальное окно с делом
+  const [ModaOrder, openModalOrder] = useModalOrder(); // Подключим модальное окно с ордером
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <div className={classes.root}>

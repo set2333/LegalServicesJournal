@@ -2,7 +2,6 @@
 import React, { useReducer } from 'react';
 import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
-import { makeStyles, createStyles } from '@material-ui/core/styles';
 import {
   Toolbar, IconButton, Typography, Grid,
 } from '@material-ui/core';
@@ -13,21 +12,11 @@ import PropTypes from 'prop-types';
 import {
   beginDay, endDay, agoMonth, beginDateZeroTime,
 } from '../functions/dateFunction';
-import Input from '../auxiliaryComponents/Input.jsx';
+import Input from '../auxiliaryComponents/Input';
 import { getExcelActions, getExcelOrders } from '../api/api';
+import MakeStyles from '../styles';
 
-const useStyles = makeStyles((theme) => createStyles({
-  menuButton: {
-    marginRight: theme.spacing(2),
-  },
-  hide: {
-    display: 'none',
-  },
-  menuRoot: {
-    backgroundColor: '#56CEF7',
-    minHeight: 128,
-  },
-}));
+const useStyles = MakeStyles;
 
 const reducer = (state, action) => {
   switch (action.type) {
@@ -52,6 +41,9 @@ const reducer = (state, action) => {
   }
 };
 
+// Состояние содержит фильтры для поиска. При нажатии на кнопку поиски эти данные оборачиваются
+// в объект фильтр и дисптчатся в App.jsx. Там происходит обновление состояния и меняются пропсы в
+// Actions.jsx или Orders.jsx, а те в свою очередь получают данные по новым фильтрам через API.
 const initialState = {
   startDate: agoMonth(Date.now()),
   endDate: endDay(Date.now()),
@@ -63,24 +55,36 @@ const initialState = {
   actionString: '',
 };
 
+// Функция получения объекта фильтра для его диспатча в родительский компонент. Так как может
+// вызыватся на разных страницах (дела, ордера) то и возвращает разные объекты. Например что бы
+// не фильтровать дела по полю юрист, которого в делах нет.
+const getFilter = (state, typeMenu, pathname) => {
+  const filter = {};
+  if (state.accused) filter.accused = state.accused;
+  if (state.date && new Date(state.date).toString() !== 'Invalid Date') filter.date = beginDateZeroTime(state.date);
+  if (state.number) filter.number = state.number;
+  if (state.creationNumber) filter.creationNumber = state.creationNumber;
+  if (typeMenu === 'orders' || (typeMenu === null && pathname === '/orders')) {
+    if (state.jurist) filter.jurist = state.jurist;
+    if (state.actionString) filter.actionString = state.actionString;
+  }
+  return filter;
+};
+
+const getFileFromServer = (response) => {
+  if (response.result) {
+    window.open(`http://${window.location.host}/getFile?fileName=${response.fileName}`, '_self');
+  }
+};
+
 const Menu = ({
   open, openPanel, openModalAction, openModalOrder, dispatch, typeMenu,
 }) => {
   const { pathname } = useLocation();
   const [state, stateDispatch] = useReducer(reducer, initialState);
   const classes = useStyles();
-  const getFilter = () => {
-    const filter = {};
-    if (state.accused) filter.accused = state.accused;
-    if (state.date && new Date(state.date).toString() !== 'Invalid Date') filter.date = beginDateZeroTime(state.date);
-    if (state.number) filter.number = state.number;
-    if (state.creationNumber) filter.creationNumber = state.creationNumber;
-    if (typeMenu === 'orders' || (typeMenu === null && pathname === '/orders')) {
-      if (state.jurist) filter.jurist = state.jurist;
-      if (state.actionString) filter.actionString = state.actionString;
-    }
-    return filter;
-  };
+  // Поля ввода выводятся с помощью компонента Input. Подготовим массивы объектов для вывода
+  // Массив выбора периода. Выводится во всех вариантах меню
   const periods = [
     {
       label: 'Начало периода',
@@ -97,6 +101,7 @@ const Menu = ({
       typeFilter: 'date',
     },
   ];
+  // Массив общих фильтров
   const filters = [
     {
       label: 'Номер',
@@ -128,6 +133,7 @@ const Menu = ({
     },
   ];
 
+  // Если меню находится на странице с ордерами, добавим в массив фильтров спецефичные фильтры
   if (typeMenu === 'orders' || (typeMenu === null && pathname === '/orders')) {
     filters.push({
       label: 'Адвокат',
@@ -180,7 +186,7 @@ const Menu = ({
           <Grid>
             <IconButton
               onClick={() => {
-                const filter = getFilter();
+                const filter = getFilter(state, typeMenu, pathname);
                 dispatch({
                   type: 'SET_FILTER',
                   value: { startDate: state.startDate, endDate: state.endDate, filter },
@@ -199,33 +205,19 @@ const Menu = ({
             </IconButton>
             <IconButton
               onClick={() => {
-                const filter = getFilter();
+                const filter = getFilter(state, typeMenu, pathname);
                 if (pathname === '/') {
                   getExcelActions({
                     startDate: new Date(state.startDate),
                     endDate: new Date(state.endDate),
                     filter,
-                  }).subscribe((response) => {
-                    if (response.result) {
-                      window.open(
-                        `http://${window.location.host}/getFile?fileName=${response.fileName}`,
-                        '_self',
-                      );
-                    }
-                  });
+                  }).subscribe(getFileFromServer);
                 } else {
                   getExcelOrders({
                     startDate: new Date(state.startDate),
                     endDate: new Date(state.endDate),
                     filter,
-                  }).subscribe((response) => {
-                    if (response.result) {
-                      window.open(
-                        `http://${window.location.host}/getFile?fileName=${response.fileName}`,
-                        '_self',
-                      );
-                    }
-                  });
+                  }).subscribe(getFileFromServer);
                 }
               }}
             >
@@ -255,12 +247,15 @@ const Menu = ({
 };
 
 Menu.propTypes = {
-  open: PropTypes.bool,
-  openPanel: PropTypes.func,
-  openModalAction: PropTypes.func,
-  openModalOrder: PropTypes.func,
-  dispatch: PropTypes.func,
-  typeMenu: PropTypes.string,
+  open: PropTypes.bool, // Признак открытости бокового меню
+  openPanel: PropTypes.func, // Открытие бокового меню
+  openModalAction: PropTypes.func, // Открытие модального окна с делом
+  openModalOrder: PropTypes.func, // Открытие модального окна с ордером
+  dispatch: PropTypes.func, // Функция которая диспатчит фильтр в родительский компонент
+  typeMenu: PropTypes.string, // тип меню (orders, actions или null). Если null то тип меню берется
+  // из const { pathname } = useLocation(); В этом случае у нас просто список ордеров или дел.
+  // Если тип указан, то мы находимся в модальной форме выбора дела, которая вызывается из модальной
+  // формы создания или редактирования ордера.
 };
 
 Menu.defaultProps = {
