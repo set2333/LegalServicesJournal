@@ -1,19 +1,21 @@
 // Модальные окна для создания/редактирования дел и ордеров
 import React, { useState, useReducer, useEffect } from 'react';
 import {
-  Modal,
-  Paper,
+  Dialog,
   Typography,
   Button,
   Grid,
   TextField,
-  Container,
+  DialogContent,
+  DialogTitle,
   Table,
   TableBody,
   TableHead,
   TableRow,
   TableCell,
+  Paper,
 } from '@material-ui/core/';
+import Draggable from 'react-draggable';
 import uid from 'uid';
 import {
   editAction, getOneAction, getExcelAction, editOrder, getOneOrder,
@@ -64,6 +66,18 @@ const initialState = {
   creationDate: '',
 };
 
+const PaperComponentAction = (props) => (
+  <Draggable handle="#draggable-dialog-title">
+    <Paper {...props} />
+  </Draggable>
+);
+
+const PaperComponentOrder = (props) => (
+  <Draggable handle="#draggable-dialog-title-order">
+    <Paper {...props} />
+  </Draggable>
+);
+
 // Модальное окно для ордера. Реализованно как пользовательский хук.
 const useModalOrder = (setUid) => {
   const [stateModal, setStateModal] = useState({
@@ -97,99 +111,102 @@ const useModalOrder = (setUid) => {
       }
     }, [stateModal.id]);
     return (
-      <Modal open={stateModal.open}>
-        <Container maxWidth="md">
-          <Paper elevation={10} style={{ margin: 10, padding: 10 }}>
-            <Grid container>
-              <Grid item md={12} align="center" style={gridStyle}>
-                <Typography>
-                  {stateModal.id === null
-                    ? 'Создание нового ордера'
-                    : `Ордер №${state.creationNumber} от ${getLocalDate(state.creationDate)}`}
-                </Typography>
-              </Grid>
-              <Grid item md={3} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Номер ордера"
-                  style={filedStyle}
-                  value={state.number}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_NUMBER', value })}
-                />
-              </Grid>
-              <Grid item md={3} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  type="date"
-                  label="Дата ордера"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  style={filedStyle}
-                  value={getInputDate(state.date)}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_DATE', value })}
-                />
-              </Grid>
-              <Grid item md={6} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Адвокат"
-                  style={filedStyle}
-                  value={state.jurist}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_JURIST', value })}
-                />
-              </Grid>
-              <Grid item md={6} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Обвиняемый"
-                  style={filedStyle}
-                  value={stateModal.accused}
-                />
-              </Grid>
-              <Grid item md={6} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Статья"
-                  style={filedStyle}
-                  value={stateModal.article}
-                />
-              </Grid>
-              <Grid item md={12} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  multiline
-                  rows="4"
-                  label="Комментарий"
-                  style={filedStyle}
-                  value={state.comment}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_COMMENT', value })}
-                />
-              </Grid>
-              <Grid item md={12} align="center" style={gridStyle}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => editOrder({ ...state, action: stateModal.action }, stateModal.id).subscribe(
-                    afterAjaxSend,
-                  )}
-                  style={buttonStyle}
-                >
-                  Сохранить
-                </Button>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => setStateModal({ open: false, id: null })}
-                  style={buttonStyle}
-                >
-                  Закрыть
-                </Button>
-              </Grid>
+      <Dialog
+        open={stateModal.open}
+        scroll="paper"
+        maxWidth="md"
+        PaperComponent={PaperComponentOrder}
+      >
+        <DialogTitle id="draggable-dialog-title-order" style={{ cursor: 'move' }}>
+          <Typography>
+            {stateModal.id === null
+              ? 'Создание нового ордера'
+              : `Ордер №${state.creationNumber} от ${getLocalDate(state.creationDate)}`}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Grid container>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Номер ордера"
+                style={filedStyle}
+                value={state.number}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_NUMBER', value })}
+              />
             </Grid>
-          </Paper>
-        </Container>
-      </Modal>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                type="date"
+                label="Дата ордера"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                style={filedStyle}
+                value={getInputDate(state.date)}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_DATE', value })}
+              />
+            </Grid>
+            <Grid item md={6} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Адвокат"
+                style={filedStyle}
+                value={state.jurist}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_JURIST', value })}
+              />
+            </Grid>
+            <Grid item md={6} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Обвиняемый"
+                style={filedStyle}
+                value={stateModal.accused}
+              />
+            </Grid>
+            <Grid item md={6} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Статья"
+                style={filedStyle}
+                value={stateModal.article}
+              />
+            </Grid>
+            <Grid item md={12} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                multiline
+                rows="4"
+                label="Комментарий"
+                style={filedStyle}
+                value={state.comment}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_COMMENT', value })}
+              />
+            </Grid>
+            <Grid item md={12} align="center" style={gridStyle}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => editOrder({ ...state, action: stateModal.action }, stateModal.id).subscribe(
+                  afterAjaxSend,
+                )}
+                style={buttonStyle}
+              >
+                Сохранить
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => setStateModal({ open: false, id: null })}
+                style={buttonStyle}
+              >
+                Закрыть
+              </Button>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
     );
   };
   return [ModalWindow, (value) => setStateModal(value)];
@@ -219,171 +236,174 @@ const useModalAction = (setUid) => {
       }
     }, [stateModal.id, state.uid]);
     return (
-      <Modal open={stateModal.open}>
-        <Container maxWidth="md">
+      <Dialog
+        open={stateModal.open}
+        scroll="paper"
+        maxWidth="md"
+        PaperComponent={PaperComponentAction}
+      >
+        <DialogTitle id="draggable-dialog-title" style={{ cursor: 'move' }}>
+          <Typography>
+            {stateModal.id === null
+              ? 'Создание нового дела'
+              : `Дело №${state.creationNumber} от ${getLocalDate(state.creationDate)}`}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
           <ModalOrder />
-          <Paper elevation={10} style={{ margin: 10, padding: 10 }}>
-            <Grid container>
-              <Grid item md={12} align="center" style={gridStyle}>
-                <Typography>
-                  {stateModal.id === null
-                    ? 'Создание нового дела'
-                    : `Дело №${state.creationNumber} от ${getLocalDate(state.creationDate)}`}
-                </Typography>
-              </Grid>
-              <Grid item md={3} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Порядковый номер"
-                  style={filedStyle}
-                  value={state.creationNumber}
-                />
-              </Grid>
-              <Grid item md={6} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Выданно"
-                  style={filedStyle}
-                  value={state.issuingAuthority}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_ISSUINGAUTHORITY', value })}
-                />
-              </Grid>
-              <Grid item md={3} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  type="date"
-                  label="Дата дела"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                  style={filedStyle}
-                  value={getInputDate(state.date)}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_DATE', value })}
-                />
-              </Grid>
-              <Grid item md={6} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Обвиняемый"
-                  style={filedStyle}
-                  value={state.accused}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_ACCUSED', value })}
-                />
-              </Grid>
-              <Grid item md={3} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Статья"
-                  style={filedStyle}
-                  value={state.article}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_ARTICLE', value })}
-                />
-              </Grid>
-              <Grid item md={3} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  label="Номер дела"
-                  style={filedStyle}
-                  value={state.number}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_NUMBER', value })}
-                />
-              </Grid>
-              <Grid item md={12} style={gridStyle}>
-                <TextField
-                  variant="outlined"
-                  multiline
-                  rows="4"
-                  label="Комментарий"
-                  style={filedStyle}
-                  value={state.comment}
-                  onChange={({ target: { value } }) => dispatch({ type: 'SET_COMMENT', value })}
-                />
-              </Grid>
-              <Grid item md={12} align="center" style={gridStyle}>
-                <Table>
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Номер ордера</TableCell>
-                      <TableCell>Дата ордера</TableCell>
-                      <TableCell>Адвокат</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {state.orders.map((order) => (
-                      <TableRow
-                        onClick={() => openModalOrder({
-                          open: true,
-                          id: order._id,
-                          accused: state.accused,
-                          article: state.article,
-                          action: stateModal.id,
-                        })}
-                      >
-                        <TableCell>{order.number}</TableCell>
-                        <TableCell>{getLocalDate(order.date)}</TableCell>
-                        <TableCell>{order.jurist}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </Grid>
-              <Grid item md={12} align="center" style={gridStyle}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={() => editAction(state, stateModal.id).subscribe(afterAjaxSend)}
-                  style={buttonStyle}
-                >
-                  Сохранить
-                </Button>
-                {stateModal.id !== null ? (
-                  <>
-                    <Button
-                      variant="contained"
-                      onClick={() => getExcelAction(stateModal.id).subscribe((response) => {
-                        if (response.result) {
-                          window.open(
-                            `http://${window.location.host}/getFile?fileName=${response.fileName}`,
-                            '_self',
-                          );
-                        }
-                      })}
-                      style={buttonStyle}
-                    >
-                      Загрузить
-                    </Button>
-                    <Button
-                      variant="contained"
+          <Grid container>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Порядковый номер"
+                style={filedStyle}
+                value={state.creationNumber}
+              />
+            </Grid>
+            <Grid item md={6} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Выданно"
+                style={filedStyle}
+                value={state.issuingAuthority}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_ISSUINGAUTHORITY', value })}
+              />
+            </Grid>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                type="date"
+                label="Дата дела"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                style={filedStyle}
+                value={getInputDate(state.date)}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_DATE', value })}
+              />
+            </Grid>
+            <Grid item md={6} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Обвиняемый"
+                style={filedStyle}
+                value={state.accused}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_ACCUSED', value })}
+              />
+            </Grid>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Статья"
+                style={filedStyle}
+                value={state.article}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_ARTICLE', value })}
+              />
+            </Grid>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="Номер дела"
+                style={filedStyle}
+                value={state.number}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_NUMBER', value })}
+              />
+            </Grid>
+            <Grid item md={12} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                multiline
+                rows="4"
+                label="Комментарий"
+                style={filedStyle}
+                value={state.comment}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_COMMENT', value })}
+              />
+            </Grid>
+            <Grid item md={12} align="center" style={gridStyle}>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Номер ордера</TableCell>
+                    <TableCell>Дата ордера</TableCell>
+                    <TableCell>Адвокат</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {state.orders.map((order) => (
+                    <TableRow
                       onClick={() => openModalOrder({
                         open: true,
-                        id: null,
+                        id: order._id,
                         accused: state.accused,
                         article: state.article,
                         action: stateModal.id,
                       })}
-                      style={buttonStyle}
                     >
-                      Новый ордер
-                    </Button>
-                  </>
-                ) : null}
-
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={() => {
-                    setUid(uid());
-                    setStateModal({ open: false, id: null });
-                  }}
-                  style={buttonStyle}
-                >
-                  Закрыть
-                </Button>
-              </Grid>
+                      <TableCell>{order.number}</TableCell>
+                      <TableCell>{getLocalDate(order.date)}</TableCell>
+                      <TableCell>{order.jurist}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </Grid>
-          </Paper>
-        </Container>
-      </Modal>
+            <Grid item md={12} align="center" style={gridStyle}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => editAction(state, stateModal.id).subscribe(afterAjaxSend)}
+                style={buttonStyle}
+              >
+                Сохранить
+              </Button>
+              {stateModal.id !== null ? (
+                <>
+                  <Button
+                    variant="contained"
+                    onClick={() => getExcelAction(stateModal.id).subscribe((response) => {
+                      if (response.result) {
+                        window.open(
+                          `http://${window.location.host}/getFile?fileName=${response.fileName}`,
+                          '_self',
+                        );
+                      }
+                    })}
+                    style={buttonStyle}
+                  >
+                    Загрузить
+                  </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => openModalOrder({
+                      open: true,
+                      id: null,
+                      accused: state.accused,
+                      article: state.article,
+                      action: stateModal.id,
+                    })}
+                    style={buttonStyle}
+                  >
+                    Новый ордер
+                  </Button>
+                </>
+              ) : null}
+
+              <Button
+                variant="contained"
+                color="secondary"
+                onClick={() => {
+                  setUid(uid());
+                  setStateModal({ open: false, id: null });
+                }}
+                style={buttonStyle}
+              >
+                Закрыть
+              </Button>
+            </Grid>
+          </Grid>
+        </DialogContent>
+      </Dialog>
     );
   };
   return [ModalWindow, (value) => setStateModal(value)];

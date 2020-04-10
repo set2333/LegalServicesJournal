@@ -38,7 +38,7 @@ function App() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const [ModalAction, openModalAction] = useModalAction((newUid) => dispatch({ type: 'SET_UID', value: newUid })); // Подключим модальное окно с делом
   return (
-    <div className={classes.root}>
+    <div className={classes.root} id="main_div">
       <ModalAction />
       <CssBaseline />
       <AppBar position="fixed" className={clsx(classes.appBar)}>
