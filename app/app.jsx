@@ -1,13 +1,5 @@
 import React from 'react';
-import 'react-app-polyfill/ie11';
-import 'react-app-polyfill/stable';
 import ReactDOM from 'react-dom';
-import { BrowserRouter as Router } from 'react-router-dom';
-import App from './pages/App.jsx';
+import App from './pages/App';
 
-ReactDOM.render(
-  <Router>
-    <App />
-  </Router>,
-  document.getElementById('app'),
-);
+ReactDOM.render(<App />, document.getElementById('app'));

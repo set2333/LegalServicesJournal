@@ -2,36 +2,17 @@
 const mongoose = require('mongoose');
 const { Action, Order } = require('./mongooseSchema');
 
-const getFilter = (filter) => {
+// Функция получения фильтрующего объекта.
+// accused и jurist - ищут не по полному совпадению, а по вхождению
+// jurist применяется только для фильтрации ордеров.
+const getFilter = (filter, byOrder = false) => {
   const result = {};
   for (const [key, value] of Object.entries(filter)) {
-    if (key === 'accused' || key === 'jurist' || key === 'actionString') result[key] = { $regex: new RegExp(value), $options: 'i' };
-    else result[key] = value;
+    if (key === 'accused' || (byOrder && key === 'jurist')) result[key] = { $regex: new RegExp(value), $options: 'i' };
+    else if (key !== 'jurist') result[key] = value;
   }
   return result;
 };
-
-// Получить дело по id.
-const getOneAction = (id = null) => new Promise((resolve) => {
-  if (id === null) resolve(null);
-  else {
-    Action.findById(id, (err, doc) => {
-      if (err || doc === null) resolve(null);
-      else resolve(doc);
-    });
-  }
-});
-
-// Получить ордер по id.
-const getOneOrder = (id = null) => new Promise((resolve) => {
-  if (id === null) resolve(null);
-  else {
-    Order.findById(id, (err, doc) => {
-      if (err || doc === null) resolve(null);
-      else resolve(doc);
-    });
-  }
-});
 
 // Максмальный номер дела. Нужно для автонумерации дел.
 const getMaxNumberAction = () => new Promise((resolve) => {
@@ -55,6 +36,82 @@ const getMaxNumberOrder = () => new Promise((resolve) => {
     });
 });
 
+// Получение списка ордеров
+const getOrders = (
+  startDate = new Date(2000, 0, 1),
+  endDate = new Date(3000, 10, 1),
+  filter = {},
+) => new Promise((resolve) => {
+  Order.find({
+    $and: [
+      { creationDate: { $gte: startDate } },
+      { creationDate: { $lte: endDate } },
+      getFilter(filter, true),
+    ],
+  })
+    .sort('-creationDate')
+    .exec((err, doc) => {
+      if (err) resolve(null);
+      else resolve(doc);
+    });
+});
+
+// Получить дело по id.
+const getOneAction = (id = null) => new Promise((resolve) => {
+  if (id === null) resolve(null);
+  else {
+    Action.findById(id, (err, action) => {
+      if (err || action === null) resolve(null);
+      else {
+        getOrders(new Date(2000, 0, 1), new Date(3000, 10, 1), { action: action._id }).then(
+          (orders) => {
+            if (orders === null) resolve(null);
+            else {
+              resolve({
+                id: action._id,
+                date: action.date,
+                number: action.number,
+                issuingAuthority: action.issuingAuthority,
+                accused: action.accused,
+                article: action.article,
+                comment: action.comment,
+                creationDate: action.creationDate,
+                creationNumber: action.creationNumber,
+                actionString: action.actionString,
+                orders,
+              });
+            }
+          },
+          () => resolve({
+            id: action._id,
+            date: action.date,
+            number: action.number,
+            issuingAuthority: action.issuingAuthority,
+            accused: action.accused,
+            article: action.article,
+            comment: action.comment,
+            creationDate: action.creationDate,
+            creationNumber: action.creationNumber,
+            actionString: action.actionString,
+            orders: [],
+          }),
+        );
+      }
+    });
+  }
+});
+
+// Получить ордер по id.
+const getOneOrder = (id = null) => new Promise((resolve) => {
+  if (id === null) resolve(null);
+  else {
+    Order.findById(id, (err, doc) => {
+      if (err || doc === null) resolve(null);
+      else resolve(doc);
+    });
+  }
+});
+
 // Добавление или изменение дела
 const addAction = ({
   id = null,
@@ -65,14 +122,7 @@ const addAction = ({
   article = null,
   comment = '',
 } = {}) => new Promise((resolve) => {
-  if (
-    id === null
-      && (date === null
-        || number === null
-        || issuingAuthority === null
-        || accused === null
-        || article === null)
-  ) resolve(null);
+  if (id === null && accused === null) resolve(null);
   else if (id) {
     getOneAction(id).then((result) => {
       const action = {
@@ -82,11 +132,6 @@ const addAction = ({
         accused: accused || result.accused,
         article: article || result.article,
         comment: comment || result.comment,
-        actionString: `№ ${
-          result.creationNumber
-        } от ${result.creationDate.toLocaleDateString()} (${number || result.number} от ${
-          date ? new Date(date).toLocaleDateString() : result.date.toLocaleDateString()
-        })`,
       };
       Action.findByIdAndUpdate(id, action, (err, doc) => {
         if (err) resolve(null);
@@ -105,10 +150,6 @@ const addAction = ({
         comment,
         creationDate,
         creationNumber: maxNumber + 1,
-        actionString: `№ ${maxNumber
-            + 1} от ${creationDate.toLocaleDateString()} (${number} от ${new Date(
-          date,
-        ).toLocaleDateString()})`,
       });
       newAction.save((err, doc) => {
         if (err) resolve(null);
@@ -124,20 +165,10 @@ const addOrder = ({
   date = null,
   number = null,
   jurist = null,
-  accused = null,
-  article = null,
   action = null,
   comment = '',
 } = {}) => new Promise((resolve) => {
-  if (
-    id === null
-      && (date === null
-        || number === null
-        || jurist === null
-        || accused === null
-        || article === null
-        || action === null)
-  ) resolve(null);
+  if (id === null && jurist === null) resolve(null);
   else if (id) {
     getOneOrder(id).then((result) => {
       getOneAction(action || result.action).then((currentAction) => {
@@ -147,17 +178,10 @@ const addOrder = ({
             date: date || result.date,
             number: number || result.number,
             jurist: jurist || result.jurist,
-            accused: accused || result.accused,
-            article: article || result.article,
             comment: comment || result.comment,
             action: action
               ? mongoose.Types.ObjectId(action)
               : mongoose.Types.ObjectId(result.action[0]),
-            actionString: `№ ${
-              currentAction.creationNumber
-            } от ${currentAction.creationDate.toLocaleDateString()} (${
-              currentAction.number
-            } от ${currentAction.date.toLocaleDateString()})`,
           };
           Order.findByIdAndUpdate(id, order, (err, doc) => {
             if (err) resolve(null);
@@ -175,17 +199,10 @@ const addOrder = ({
             date,
             number,
             jurist,
-            accused,
-            article,
             comment,
             creationDate: new Date(),
             creationNumber: maxNumber + 1,
             action: mongoose.Types.ObjectId(action),
-            actionString: `№ ${
-              currentAction.creationNumber
-            } от ${currentAction.creationDate.toLocaleDateString()} (${
-              currentAction.number
-            } от ${currentAction.date.toLocaleDateString()})`,
           });
           newOrder.save((err, doc) => {
             if (err) resolve(null);
@@ -197,6 +214,7 @@ const addOrder = ({
   }
 });
 
+// Получение списка дел
 const getActions = (
   startDate = new Date(2000, 0, 1),
   endDate = new Date(3000, 0, 1),
@@ -212,26 +230,19 @@ const getActions = (
     .sort('-creationDate')
     .exec((err, doc) => {
       if (err) resolve(null);
-      else resolve(doc);
-    });
-});
-
-const getOrders = (
-  startDate = new Date(2000, 0, 1),
-  endDate = new Date(3000, 10, 1),
-  filter = {},
-) => new Promise((resolve) => {
-  Order.find({
-    $and: [
-      { creationDate: { $gte: startDate } },
-      { creationDate: { $lte: endDate } },
-      getFilter(filter),
-    ],
-  })
-    .sort('-creationDate')
-    .exec((err, doc) => {
-      if (err) resolve(null);
-      else resolve(doc);
+      else if (filter.jurist) {
+        getOrders(startDate, endDate, { jurist: filter.jurist }).then(
+          (orders) => {
+            const newDoc = doc.filter((action) => orders.find((order) => order.action[0].toString() === action._id.toString()));
+            const promises = newDoc.map(({ id }) => getOneAction(id));
+            resolve(Promise.all(promises));
+          },
+          () => resolve(null),
+        );
+      } else {
+        const promises = doc.map(({ id }) => getOneAction(id));
+        resolve(Promise.all(promises));
+      }
     });
 });
 

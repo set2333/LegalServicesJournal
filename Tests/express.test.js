@@ -9,12 +9,6 @@ describe('Тестирование основного роутера', () => {
       .expect(200)
       .end(done);
   });
-  it('Тест /orders', (done) => {
-    request(app)
-      .get('/orders')
-      .expect(200)
-      .end(done);
-  });
   it('Тест неверного адреса', (done) => {
     request(app)
       .get('/badPath')
@@ -143,13 +137,13 @@ describe('Тестирование API', () => {
       .send()
       .expect(200)
       .then((response) => {
-        const { _id: id } = JSON.parse(response.text)[0];
+        const { id } = JSON.parse(response.text)[0];
         request(app)
           .post('/api/oneAction')
           .send({ id })
           .expect(200)
           .then((responseOneAction) => {
-            assert(JSON.parse(responseOneAction.text)._id, id);
+            assert(JSON.parse(responseOneAction.text).id, id);
             done();
           });
       });
@@ -187,15 +181,13 @@ describe('Тестирование API', () => {
       .post('/api/actions')
       .send({})
       .then((response) => {
-        const id = JSON.parse(response.text)[0]._id;
+        const { id } = JSON.parse(response.text)[0];
         request(app)
           .post('/api/order')
           .send({
             date: new Date(),
             number: '567',
-            accused: 'Иванов Иван Иванович',
             jurist: 'Сидоров Илья Сидорович',
-            article: 'ст.654',
             comment: 'Комментарий',
             action: id,
           })
@@ -218,8 +210,6 @@ describe('Тестирование API', () => {
           .send({
             date: new Date(),
             number: '888',
-            accused: 'Иванов Иван Иванович',
-            article: 'ст.123',
             comment: 'Комментарий',
             id,
           })

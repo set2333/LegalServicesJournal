@@ -126,7 +126,7 @@ mongoose.connect(
         const action = await getActions(new Date(2000, 1, 1), new Date(3000, 1, 1), {
           number: item.action,
         });
-        await addOrder({ ...item, date: demoDate, action: action[0]._id });
+        await addOrder({ ...item, date: demoDate, action: action[0].id });
       }, 1500 + index * 100);
     });
   },

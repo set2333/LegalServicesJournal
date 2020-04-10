@@ -186,7 +186,7 @@ describe('TEST: module mongoFunction.js', () => {
         getOneAction(newAction._id).then((result) => {
           assert.deepEqual(
             { creationDate: result.creationDate, id: result.id },
-            { creationDate: newAction.creationDate, id: newAction.id },
+            { creationDate: newAction.creationDate, id: newAction._id },
           );
           done();
         });
