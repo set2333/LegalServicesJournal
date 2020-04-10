@@ -17,7 +17,7 @@ const Filters = React.memo(({ state, dispatch, keyPress }) => {
   return (
     <Grid container direction="row" justify="flex-start" alignItems="center">
       <Grid>
-        <Typography variant="h6">Филтры</Typography>
+        <Typography variant="h6">Фильтры</Typography>
       </Grid>
       <Grid>
         <TextField
@@ -41,7 +41,7 @@ const Filters = React.memo(({ state, dispatch, keyPress }) => {
           }}
           variant="outlined"
           size="small"
-          label="Дата дела"
+          label="Дата постаноления"
           value={getInputDate(state.date)}
           onChange={({ target: { value } }) => dispatch({ type: 'SET_DATE', value })}
           onKeyUp={({ key }) => {

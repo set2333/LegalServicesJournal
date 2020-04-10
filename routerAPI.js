@@ -42,24 +42,24 @@ const getWorkBook = (values) => {
     if (item.orders.length === 0) {
       workSheet.addRow({
         space: '',
-        name: `Дело №${item.creationNumber} от ${item.creationDate.toLocaleDateString()}`,
+        name: `Постановление №${item.creationNumber} от ${item.creationDate.toLocaleDateString()}`,
         value: '',
       }).font = {
         size: 16,
         bold: true,
       };
-      let row = workSheet.addRow({ space: '', name: 'Номер дела', value: item.number });
+      let row = workSheet.addRow({ space: '', name: 'Выдано', value: item.issuingAuthority });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
       row = workSheet.addRow({
         space: '',
-        name: 'Дата дела',
+        name: 'Дата постановления',
         value: item.date,
       });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
       row.getCell('value').alignment = { vertical: 'top', horizontal: 'left' };
-      row = workSheet.addRow({ space: '', name: 'Выданно', value: item.issuingAuthority });
+      row = workSheet.addRow({ space: '', name: 'Номер постановления', value: item.number });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
       row = workSheet.addRow({ space: '', name: 'Обвиняемый', value: item.accused });
@@ -73,12 +73,10 @@ const getWorkBook = (values) => {
     } else {
       workSheet.addRow({
         space: '',
-        name: `Дело №${item.creationNumber} от ${item.creationDate.toLocaleDateString()}`,
+        name: `Постановление №${item.creationNumber} от ${item.creationDate.toLocaleDateString()}`,
         value: '',
         space2: '',
-        name2: `Ордер №${
-          item.orders[0].creationNumber
-        } от ${item.orders[0].creationDate.toLocaleDateString()}`,
+        name2: '',
         value2: '',
       }).font = {
         size: 16,
@@ -87,8 +85,8 @@ const getWorkBook = (values) => {
       workSheet.addRow(['']);
       let row = workSheet.addRow({
         space: '',
-        name: 'Номер дела',
-        value: item.number,
+        name: 'Выдано',
+        value: item.issuingAuthority,
         space2: '',
         name2: 'Номер ордера',
         value2: item.orders[0].number,
@@ -99,7 +97,7 @@ const getWorkBook = (values) => {
       row.getCell('value2').border = border;
       row = workSheet.addRow({
         space: '',
-        name: 'Дата дела',
+        name: 'Дата постановления',
         value: item.date,
         space2: '',
         name2: 'Дата ордера',
@@ -113,8 +111,8 @@ const getWorkBook = (values) => {
       row.getCell('value2').alignment = { vertical: 'top', horizontal: 'left' };
       row = workSheet.addRow({
         space: '',
-        name: 'Выданно',
-        value: item.issuingAuthority,
+        name: 'Номер постановления',
+        value: item.number,
         space2: '',
         name2: 'Адвокат',
         value2: item.orders[0].jurist,
@@ -132,17 +130,38 @@ const getWorkBook = (values) => {
           name: 'Статья',
           value: item.article,
           space2: '',
-          name2: `Ордер №${
-            item.orders[1].creationNumber
-          } от ${item.orders[1].creationDate.toLocaleDateString()}`,
+          name2: 'Номер ордера',
+          value2: item.orders[1].number,
         });
         row.getCell('name').border = border;
-        row.getCell('name2').font = {
-          size: 16,
-          bold: true,
-        };
         row.getCell('value').border = border;
-        workSheet.addRow(['']);
+        row.getCell('name2').border = border;
+        row.getCell('value2').border = border;
+        row = workSheet.addRow({
+          space: '',
+          name: '',
+          value: '',
+          space2: '',
+          name2: 'Дата ордера',
+          value2: item.orders[1].date,
+        });
+        row.getCell('name').border = border;
+        row.getCell('value').border = border;
+        row.getCell('name2').border = border;
+        row.getCell('value2').border = border;
+        row.getCell('value2').alignment = { vertical: 'top', horizontal: 'left' };
+        row = workSheet.addRow({
+          space: '',
+          name: '',
+          value: '',
+          space2: '',
+          name2: 'Адвокат',
+          value2: item.orders[1].jurist,
+        });
+        row.getCell('name2').border = border;
+        row.getCell('value2').border = border;
+        row = workSheet.addRow({ space: '' });
+        if (item.orders.length === 2) cells.map((cell) => (row.getCell(cell).fill = fill));
       } else {
         row = workSheet.addRow({
           space: '',
@@ -155,23 +174,7 @@ const getWorkBook = (values) => {
         cells.map((cell) => (row.getCell(cell).fill = fill));
       }
       if (item.orders.length > 1) {
-        for (let i = 1; i < item.orders.length; i += 1) {
-          if (i !== 1) {
-            workSheet.addRow({
-              space: '',
-              name: '',
-              value: '',
-              space2: '',
-              name2: `Ордер №${item.orders[i].creationNumber} от ${item.orders[
-                i
-              ].creationDate.toLocaleDateString()}`,
-              value2: '',
-            }).font = {
-              size: 16,
-              bold: true,
-            };
-            workSheet.addRow(['']);
-          }
+        for (let i = 2; i < item.orders.length; i += 1) {
           row = workSheet.addRow({
             space: '',
             name: '',

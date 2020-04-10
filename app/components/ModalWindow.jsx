@@ -215,8 +215,9 @@ const useModalOrder = (setUid) => {
 // Модальное окно для дела. Реализованно как пользовательский хук.
 const useModalAction = (setUid) => {
   const [stateModal, setStateModal] = useState({ open: false, id: null });
-  const afterAjaxSend = (response) => {
-    setStateModal({ open: true, id: response._id });
+  const closeModalWindow = () => {
+    setStateModal({ open: false, id: null });
+    setUid(uid());
   };
   const ModalWindow = () => {
     const [state, dispatch] = useReducer(reducer, {
@@ -252,18 +253,10 @@ const useModalAction = (setUid) => {
         <DialogContent>
           <ModalOrder />
           <Grid container>
-            <Grid item md={3} style={gridStyle}>
+            <Grid item md={9} style={gridStyle}>
               <TextField
                 variant="outlined"
-                label="Порядковый номер"
-                style={filedStyle}
-                value={state.creationNumber}
-              />
-            </Grid>
-            <Grid item md={6} style={gridStyle}>
-              <TextField
-                variant="outlined"
-                label="Выданно"
+                label="Выдано"
                 style={filedStyle}
                 value={state.issuingAuthority}
                 onChange={({ target: { value } }) => dispatch({ type: 'SET_ISSUINGAUTHORITY', value })}
@@ -273,7 +266,7 @@ const useModalAction = (setUid) => {
               <TextField
                 variant="outlined"
                 type="date"
-                label="Дата дела"
+                label="Дата постаонвления"
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -353,7 +346,7 @@ const useModalAction = (setUid) => {
               <Button
                 variant="contained"
                 color="primary"
-                onClick={() => editAction(state, stateModal.id).subscribe(afterAjaxSend)}
+                onClick={() => editAction(state, stateModal.id).subscribe(closeModalWindow)}
                 style={buttonStyle}
               >
                 Сохранить
@@ -393,10 +386,7 @@ const useModalAction = (setUid) => {
               <Button
                 variant="contained"
                 color="secondary"
-                onClick={() => {
-                  setUid(uid());
-                  setStateModal({ open: false, id: null });
-                }}
+                onClick={closeModalWindow}
                 style={buttonStyle}
               >
                 Закрыть
