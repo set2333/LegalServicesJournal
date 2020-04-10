@@ -11,7 +11,7 @@ import { getLocalDate } from '../functions/dateFunction';
 // children - объект содержащий информацию о деле
 const Row = React.memo(
   ({ children, clickRow }) => (
-    <TableRow key={children.id} onClick={() => clickRow(children.id)}>
+    <TableRow key={children.id} onClick={() => clickRow(children.id)} style={{ cursor: 'pointer' }}>
       <TableCell>{children.creationNumber}</TableCell>
       <TableCell>{getLocalDate(children.creationDate)}</TableCell>
       <TableCell>{children.number}</TableCell>

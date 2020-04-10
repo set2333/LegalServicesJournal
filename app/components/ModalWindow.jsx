@@ -332,6 +332,7 @@ const useModalAction = (setUid) => {
                 <TableBody>
                   {state.orders.map((order) => (
                     <TableRow
+                      style={{ cursor: 'pointer' }}
                       onClick={() => openModalOrder({
                         open: true,
                         id: order._id,
