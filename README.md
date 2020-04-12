@@ -50,8 +50,9 @@ serverModules - серверные функции.
     mongoFunctions.js - функции работы с БД.
     mongooseSchema.js - mongoose схемы данных.
 Test - функции тестирования.
-  express.test.js - тестирование api.
-  mongo.test.js - тестирование функций работы с БД.
+  expresstest.js - тестирование api.
+  mongotest.js - тестирование функций работы с БД.
+  start.js - запуск тестов.
 index.html - файл для получения всего этого.
 index.js - запуск сервера node.js.
 initDemoBase.js - заполнение демо-базы.

@@ -1,7 +1,4 @@
-const mongoose = require('mongoose');
 const assert = require('assert');
-const { Action, Order } = require('../serverModules/mongoModules/mongooseSchema');
-
 const {
   addAction,
   getOneAction,
@@ -13,23 +10,16 @@ const {
   getOrders,
 } = require('../serverModules/mongoModules/mongoFunctions');
 
-mongoose.connect(
-  'mongodb://localhost:27017/juristjournal',
-  { useNewUrlParser: true, useUnifiedTopology: true, useFindAndModify: false },
-  async (err) => {
-    if (err) return console.log(err);
-    Action.collection.drop();
-    Order.collection.drop();
-    setTimeout(() => mongoose.disconnect(), 1000);
-  },
-);
-
-describe('TEST: module mongoFunction.js', () => {
+const mongooseTest = async () => describe('TEST: module mongoFunction.js', () => {
   it('getMaxNumberAction без докуменов', (done) => {
-    getMaxNumberAction().then((result) => {
-      assert.equal(result, 0);
-      done();
-    });
+    try {
+      getMaxNumberAction().then((result) => {
+        assert.equal(result, 0);
+        done();
+      });
+    } catch (err) {
+      console.log(err);
+    }
   });
 
   it('getOneAction без параметров', (done) => {
@@ -41,6 +31,13 @@ describe('TEST: module mongoFunction.js', () => {
 
   it('getOneAction с неверным id', (done) => {
     getOneAction('123456789').then((result) => {
+      assert.equal(result, null);
+      done();
+    });
+  });
+
+  it('getOneAction с id неверного тип', (done) => {
+    getOneAction({ id: '123' }).then((result) => {
       assert.equal(result, null);
       done();
     });
@@ -287,6 +284,13 @@ describe('TEST: module mongoFunction.js', () => {
 
   it('getOneOrder с неверным id', (done) => {
     getOneOrder('123456789').then((result) => {
+      assert.equal(result, null);
+      done();
+    });
+  });
+
+  it('getOneOrder с id неверного типа', (done) => {
+    getOneOrder({ data: '123456789' }).then((result) => {
       assert.equal(result, null);
       done();
     });
@@ -603,3 +607,5 @@ describe('TEST: module mongoFunction.js', () => {
     });
   });
 });
+
+module.exports = { mongooseTest };

@@ -7,7 +7,7 @@
     "dev": "webpack-dev-server --hot --open",
     "build": "webpack --mode=development",
     "buildprod": "webpack --mode=production",
-    "test": "mocha Tests/*.test.js"
+    "test": "mocha Tests/start.js"
   },
   "repository": {
     "type": "git",

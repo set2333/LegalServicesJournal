@@ -133,7 +133,7 @@ const addAction = ({
         article: article || result.article,
         comment: comment || result.comment,
       };
-      Action.findByIdAndUpdate(id, action, (err, doc) => {
+      Action.findByIdAndUpdate(id, action, { returnOriginal: false }, (err, doc) => {
         if (err) resolve(null);
         else resolve(doc);
       });
@@ -183,7 +183,7 @@ const addOrder = ({
               ? mongoose.Types.ObjectId(action)
               : mongoose.Types.ObjectId(result.action[0]),
           };
-          Order.findByIdAndUpdate(id, order, (err, doc) => {
+          Order.findByIdAndUpdate(id, order, { returnOriginal: false }, (err, doc) => {
             if (err) resolve(null);
             else resolve(doc);
           });
