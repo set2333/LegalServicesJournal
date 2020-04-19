@@ -71,6 +71,7 @@ const initialState = {
   comment: '',
   creationNumber: '',
   creationDate: '',
+  measureDate: '',
 };
 
 const PaperComponentAction = (props) => (

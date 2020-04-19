@@ -157,6 +157,7 @@ const addAction = ({
         accused,
         article,
         comment,
+        measureDate,
         creationDate: creationDate || newCreationDate,
         creationNumber: creationNumber || maxNumber + 1,
       });
