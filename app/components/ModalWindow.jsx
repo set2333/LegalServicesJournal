@@ -50,6 +50,13 @@ const reducer = (state, action) => {
       return { ...state, article: action.value };
     case 'SET_COMMENT':
       return { ...state, comment: action.value };
+    case 'SET_MEASUREDATE':
+      return { ...state, measureDate: action.value };
+    case 'SET_CREATIONNUMBER':
+      return { ...state, creationNumber: action.value };
+    case 'SET_CREATIONDATE': {
+      return { ...state, creationDate: action.value };
+    }
     case 'SET_UID':
       return { ...state, uid: action.value };
     case 'SET_ALL':
@@ -253,10 +260,32 @@ const useModalAction = (setUid) => {
         <DialogContent>
           <ModalOrder />
           <Grid container>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                label="п.п"
+                style={filedStyle}
+                value={state.creationNumber}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_CREATIONNUMBER', value })}
+              />
+            </Grid>
+            <Grid item md={3} style={gridStyle}>
+              <TextField
+                variant="outlined"
+                type="date"
+                label="Дата вх."
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                style={filedStyle}
+                value={getInputDate(state.creationDate)}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_CREATIONDATE', value })}
+              />
+            </Grid>
             <Grid item md={9} style={gridStyle}>
               <TextField
                 variant="outlined"
-                label="Выдано"
+                label="Кем вынесено"
                 style={filedStyle}
                 value={state.issuingAuthority}
                 onChange={({ target: { value } }) => dispatch({ type: 'SET_ISSUINGAUTHORITY', value })}
@@ -266,7 +295,7 @@ const useModalAction = (setUid) => {
               <TextField
                 variant="outlined"
                 type="date"
-                label="Дата постаонвления"
+                label="Дата дела"
                 InputLabelProps={{
                   shrink: true,
                 }}
@@ -302,10 +331,22 @@ const useModalAction = (setUid) => {
                 onChange={({ target: { value } }) => dispatch({ type: 'SET_NUMBER', value })}
               />
             </Grid>
-            <Grid item md={12} style={gridStyle}>
+            <Grid item md={3} style={gridStyle}>
               <TextField
                 variant="outlined"
-                multiline
+                type="date"
+                label="Дата мероприятия"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+                style={filedStyle}
+                value={getInputDate(state.measureDate)}
+                onChange={({ target: { value } }) => dispatch({ type: 'SET_MEASUREDATE', value })}
+              />
+            </Grid>
+            <Grid item md={9} style={gridStyle}>
+              <TextField
+                variant="outlined"
                 rows="4"
                 label="Комментарий"
                 style={filedStyle}
@@ -339,6 +380,20 @@ const useModalAction = (setUid) => {
                       <TableCell>{order.jurist}</TableCell>
                     </TableRow>
                   ))}
+                  <TableRow
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => openModalOrder({
+                      open: true,
+                      id: null,
+                      accused: state.accused,
+                      article: state.article,
+                      action: stateModal.id,
+                    })}
+                  >
+                    <TableCell />
+                    <TableCell />
+                    <TableCell />
+                  </TableRow>
                 </TableBody>
               </Table>
             </Grid>
@@ -366,19 +421,6 @@ const useModalAction = (setUid) => {
                     style={buttonStyle}
                   >
                     Загрузить
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={() => openModalOrder({
-                      open: true,
-                      id: null,
-                      accused: state.accused,
-                      article: state.article,
-                      action: stateModal.id,
-                    })}
-                    style={buttonStyle}
-                  >
-                    Новый ордер
                   </Button>
                 </>
               ) : null}

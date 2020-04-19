@@ -4,7 +4,7 @@
 // датой в локалтном формате. Иначе вернет то, что было переданно.
 const getLocalDate = (date) => {
   const result = new Date(date);
-  return Number.isNaN(result) ? date : result.toLocaleDateString();
+  return result.toString() === 'Invalid Date' ? '' : result.toLocaleDateString();
 };
 
 // Функция получает значение и пытается привести его к дате. Если удастся, то возвращает начало дня.
@@ -58,7 +58,7 @@ const agoMonth = (date) => {
 // гггг-мм-дд, иначе возвращает параметр
 const getInputDate = (date) => {
   const res = new Date(date);
-  return Number.isNaN(res)
+  return res.toString() === 'Invalid Date'
     ? date
     : `${res.getFullYear()}-${(res.getMonth() + 1 < 10 ? '0' : '')
         + (res.getMonth() + 1)}-${(res.getDate() < 10 ? '0' : '') + res.getDate()}`;

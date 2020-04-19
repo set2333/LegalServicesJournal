@@ -46,15 +46,13 @@ function App() {
       </AppBar>
       <main className={clsx(classes.content)}>
         <div className={classes.drawerHeader} />
-        <div>
-          <Actions
-            startDate={state.startDate}
-            endDate={state.endDate}
-            filter={state.filter}
-            clickRow={(value) => openModalAction({ open: true, id: value })}
-            uid={state.uid}
-          />
-        </div>
+        <Actions
+          startDate={state.startDate}
+          endDate={state.endDate}
+          filter={state.filter}
+          clickRow={(value) => openModalAction({ open: true, id: value })}
+          uid={state.uid}
+        />
       </main>
     </div>
   );

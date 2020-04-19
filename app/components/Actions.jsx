@@ -2,7 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Table, TableBody, TableHead, TableRow, TableCell,
+  Table,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableContainer,
 } from '@material-ui/core';
 import { getActions } from '../api/api';
 import Row from './Row';
@@ -19,25 +24,29 @@ const Actions = ({
     );
   }, [startDate, endDate, filter, uid]);
   return (
-    <Table>
-      <TableHead>
-        <TableRow>
-          <TableCell>Номер</TableCell>
-          <TableCell>Дата</TableCell>
-          <TableCell>Номер дела</TableCell>
-          <TableCell>Дата дела</TableCell>
-          <TableCell>Выданно</TableCell>
-          <TableCell>Обвиняемый</TableCell>
-          <TableCell>Статья</TableCell>
-          <TableCell>Ордер(номер, дата, адвокат)</TableCell>
-        </TableRow>
-      </TableHead>
-      <TableBody>
-        {rows.map((item) => (
-          <Row clickRow={clickRow}>{item}</Row>
-        ))}
-      </TableBody>
-    </Table>
+    <TableContainer style={{ height: document.documentElement.clientHeight - 128 }}>
+      <Table stickyHeader>
+        <TableHead>
+          <TableRow>
+            <TableCell>п.п</TableCell>
+            <TableCell>Дата вх.</TableCell>
+            <TableCell>Кем вынесено</TableCell>
+            <TableCell>Дата дела</TableCell>
+            <TableCell>Номер дела</TableCell>
+            <TableCell>Обвиняемый</TableCell>
+            <TableCell>Статья</TableCell>
+            <TableCell>Дата мероприятия</TableCell>
+            <TableCell>Комментарий</TableCell>
+            <TableCell>Ордер(номер, дата, адвокат)</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((item) => (
+            <Row clickRow={clickRow}>{item}</Row>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
   );
 };
 

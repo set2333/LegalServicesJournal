@@ -24,7 +24,7 @@ const Filters = React.memo(({ state, dispatch, keyPress }) => {
           className={classes.textFilter}
           variant="outlined"
           size="small"
-          label="Номер"
+          label="п.п"
           value={state.creationNumber === 0 ? '' : state.creationNumber}
           onChange={({ target: { value } }) => {
             if (!Number.isNaN(+value)) dispatch({ type: 'SET_CREATION_NUMBER', value: +value });
@@ -41,7 +41,7 @@ const Filters = React.memo(({ state, dispatch, keyPress }) => {
           }}
           variant="outlined"
           size="small"
-          label="Дата постаноления"
+          label="Дата дела"
           value={getInputDate(state.date)}
           onChange={({ target: { value } }) => dispatch({ type: 'SET_DATE', value })}
           onKeyUp={({ key }) => {
@@ -77,6 +77,17 @@ const Filters = React.memo(({ state, dispatch, keyPress }) => {
           label="Адвокат"
           value={state.jurist}
           onChange={({ target: { value } }) => dispatch({ type: 'SET_JURIST', value })}
+          onKeyUp={({ key }) => {
+            if (key === 'Enter') keyPress();
+          }}
+        />
+        <TextField
+          className={classes.textFilter}
+          variant="outlined"
+          size="small"
+          label="Ордер"
+          value={state.orderNumber}
+          onChange={({ target: { value } }) => dispatch({ type: 'SET_ORDERNUMBER', value })}
           onKeyUp={({ key }) => {
             if (key === 'Enter') keyPress();
           }}

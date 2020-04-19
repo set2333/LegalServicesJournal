@@ -32,6 +32,8 @@ const reducer = (state, action) => {
       return { ...state, accused: action.value };
     case 'SET_JURIST':
       return { ...state, jurist: action.value };
+    case 'SET_ORDERNUMBER':
+      return { ...state, orderNumber: action.value };
     default:
       return { ...state };
   }
@@ -46,6 +48,7 @@ const initialState = {
   date: '',
   number: '',
   creationNumber: '',
+  orderNumber: '',
   accused: '',
   jurist: '',
 };
@@ -60,6 +63,7 @@ const getFilter = (state) => {
   if (state.number) filter.number = state.number;
   if (state.creationNumber) filter.creationNumber = state.creationNumber;
   if (state.jurist) filter.jurist = state.jurist;
+  if (state.orderNumber) filter.orderNumber = state.orderNumber;
   return filter;
 };
 

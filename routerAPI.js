@@ -40,26 +40,28 @@ const getWorkBook = (values) => {
   ];
   values.forEach((item) => {
     if (item.orders.length === 0) {
-      workSheet.addRow({
+      let row = workSheet.addRow({
         space: '',
         name: `Постановление №${item.creationNumber} от ${item.creationDate.toLocaleDateString()}`,
         value: '',
-      }).font = {
+      });
+      row.getCell('name').font = {
         size: 16,
         bold: true,
       };
-      let row = workSheet.addRow({ space: '', name: 'Выдано', value: item.issuingAuthority });
+      workSheet.mergeCells(row.getCell('name').address, row.getCell('value').address);
+      row = workSheet.addRow({ space: '', name: 'Кем вынесено', value: item.issuingAuthority });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
       row = workSheet.addRow({
         space: '',
-        name: 'Дата постановления',
+        name: 'Дата дела',
         value: item.date,
       });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
       row.getCell('value').alignment = { vertical: 'top', horizontal: 'left' };
-      row = workSheet.addRow({ space: '', name: 'Номер постановления', value: item.number });
+      row = workSheet.addRow({ space: '', name: 'Номер дела', value: item.number });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
       row = workSheet.addRow({ space: '', name: 'Обвиняемый', value: item.accused });
@@ -68,24 +70,31 @@ const getWorkBook = (values) => {
       row = workSheet.addRow({ space: '', name: 'Статья', value: item.article });
       row.getCell('name').border = border;
       row.getCell('value').border = border;
+      row = workSheet.addRow({ space: '', name: 'Дата мероприятия', value: item.measureDate });
+      row.getCell('name').border = border;
+      row.getCell('value').border = border;
+      row.getCell('value').alignment = { vertical: 'top', horizontal: 'left' };
+      row = workSheet.addRow({ space: '', name: 'Комментарий', value: item.comment });
+      row.getCell('name').border = border;
+      row.getCell('value').border = border;
+      row.getCell('value').alignment = { wrapText: true };
       row = workSheet.addRow({ space: '' });
       cells.map((cell) => (row.getCell(cell).fill = fill));
     } else {
-      workSheet.addRow({
+      let row = workSheet.addRow({
         space: '',
         name: `Постановление №${item.creationNumber} от ${item.creationDate.toLocaleDateString()}`,
         value: '',
-        space2: '',
-        name2: '',
-        value2: '',
-      }).font = {
+      });
+      row.getCell('name').font = {
         size: 16,
         bold: true,
       };
+      workSheet.mergeCells(row.getCell('name').address, row.getCell('value').address);
       workSheet.addRow(['']);
-      let row = workSheet.addRow({
+      row = workSheet.addRow({
         space: '',
-        name: 'Выдано',
+        name: 'Кем вынесено',
         value: item.issuingAuthority,
         space2: '',
         name2: 'Номер ордера',
@@ -97,7 +106,7 @@ const getWorkBook = (values) => {
       row.getCell('value2').border = border;
       row = workSheet.addRow({
         space: '',
-        name: 'Дата постановления',
+        name: 'Дата дела',
         value: item.date,
         space2: '',
         name2: 'Дата ордера',
@@ -111,7 +120,7 @@ const getWorkBook = (values) => {
       row.getCell('value2').alignment = { vertical: 'top', horizontal: 'left' };
       row = workSheet.addRow({
         space: '',
-        name: 'Номер постановления',
+        name: 'Номер дела',
         value: item.number,
         space2: '',
         name2: 'Адвокат',
@@ -139,25 +148,29 @@ const getWorkBook = (values) => {
         row.getCell('value2').border = border;
         row = workSheet.addRow({
           space: '',
-          name: '',
-          value: '',
+          name: 'Дата мероприятия',
+          value: item.measureDate,
           space2: '',
           name2: 'Дата ордера',
           value2: item.orders[1].date,
         });
         row.getCell('name').border = border;
         row.getCell('value').border = border;
+        row.getCell('value').alignment = { vertical: 'top', horizontal: 'left' };
         row.getCell('name2').border = border;
         row.getCell('value2').border = border;
         row.getCell('value2').alignment = { vertical: 'top', horizontal: 'left' };
         row = workSheet.addRow({
           space: '',
-          name: '',
-          value: '',
+          name: 'Комментарий',
+          value: item.comment,
           space2: '',
           name2: 'Адвокат',
           value2: item.orders[1].jurist,
         });
+        row.getCell('name').border = border;
+        row.getCell('value').border = border;
+        row.getCell('value').alignment = { wrapText: true };
         row.getCell('name2').border = border;
         row.getCell('value2').border = border;
         row = workSheet.addRow({ space: '' });
@@ -170,6 +183,14 @@ const getWorkBook = (values) => {
         });
         row.getCell('name').border = border;
         row.getCell('value').border = border;
+        row = workSheet.addRow({ space: '', name: 'Дата мероприятия', value: item.measureDate });
+        row.getCell('name').border = border;
+        row.getCell('value').border = border;
+        row.getCell('value').alignment = { vertical: 'top', horizontal: 'left' };
+        row = workSheet.addRow({ space: '', name: 'Комментарий', value: item.comment });
+        row.getCell('name').border = border;
+        row.getCell('value').border = border;
+        row.getCell('value').alignment = { wrapText: true };
         row = workSheet.addRow({ space: '' });
         cells.map((cell) => (row.getCell(cell).fill = fill));
       }

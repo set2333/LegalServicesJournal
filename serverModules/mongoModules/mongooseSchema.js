@@ -15,6 +15,7 @@ const Action = mongoose.model(
       article: String,
       creationDate: Date,
       creationNumber: Number,
+      measureDate: Date,
       comment: String,
     },
     { versionKey: false },

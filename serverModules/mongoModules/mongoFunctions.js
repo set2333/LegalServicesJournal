@@ -9,7 +9,8 @@ const getFilter = (filter, byOrder = false) => {
   const result = {};
   for (const [key, value] of Object.entries(filter)) {
     if (key === 'accused' || (byOrder && key === 'jurist')) result[key] = { $regex: new RegExp(value), $options: 'i' };
-    else if (key !== 'jurist') result[key] = value;
+    else if (byOrder && key === 'orderNumber') result.number = value;
+    else if (key !== 'jurist' && key !== 'orderNumber') result[key] = value;
   }
   return result;
 };
@@ -74,6 +75,7 @@ const getOneAction = (id = null) => new Promise((resolve) => {
                 issuingAuthority: action.issuingAuthority,
                 accused: action.accused,
                 article: action.article,
+                measureDate: action.measureDate,
                 comment: action.comment,
                 creationDate: action.creationDate,
                 creationNumber: action.creationNumber,
@@ -89,6 +91,7 @@ const getOneAction = (id = null) => new Promise((resolve) => {
             issuingAuthority: action.issuingAuthority,
             accused: action.accused,
             article: action.article,
+            measureDate: action.measureDate,
             comment: action.comment,
             creationDate: action.creationDate,
             creationNumber: action.creationNumber,
@@ -120,6 +123,9 @@ const addAction = ({
   issuingAuthority = null,
   accused = null,
   article = null,
+  measureDate = null,
+  creationDate = null,
+  creationNumber = null,
   comment = '',
 } = {}) => new Promise((resolve) => {
   if (id === null && accused === null) resolve(null);
@@ -131,6 +137,9 @@ const addAction = ({
         issuingAuthority: issuingAuthority || result.issuingAuthority,
         accused: accused || result.accused,
         article: article || result.article,
+        measureDate: measureDate || result.measureDate,
+        creationDate: creationDate || result.creationDate,
+        creationNumber: creationNumber || result.creationNumber,
         comment: comment || result.comment,
       };
       Action.findByIdAndUpdate(id, action, { returnOriginal: false }, (err, doc) => {
@@ -140,7 +149,7 @@ const addAction = ({
     });
   } else {
     getMaxNumberAction().then((maxNumber) => {
-      const creationDate = new Date();
+      const newCreationDate = new Date();
       const newAction = new Action({
         date,
         number,
@@ -148,8 +157,8 @@ const addAction = ({
         accused,
         article,
         comment,
-        creationDate,
-        creationNumber: maxNumber + 1,
+        creationDate: creationDate || newCreationDate,
+        creationNumber: creationNumber || maxNumber + 1,
       });
       newAction.save((err, doc) => {
         if (err) resolve(null);
@@ -230,8 +239,11 @@ const getActions = (
     .sort('-creationDate')
     .exec((err, doc) => {
       if (err) resolve(null);
-      else if (filter.jurist) {
-        getOrders(startDate, endDate, { jurist: filter.jurist }).then(
+      else if (filter.jurist || filter.orderNumber) {
+        const filterOrder = {};
+        if (filter.jurist) filterOrder.jurist = filter.jurist;
+        if (filter.orderNumber) filterOrder.orderNumber = filter.orderNumber;
+        getOrders(startDate, endDate, filterOrder).then(
           (orders) => {
             const newDoc = doc.filter((action) => orders.find((order) => order.action[0].toString() === action._id.toString()));
             const promises = newDoc.map(({ id }) => getOneAction(id));
